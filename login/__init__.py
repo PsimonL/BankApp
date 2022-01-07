@@ -8,14 +8,14 @@ def get_inputs(inputs, data):
         inputs[key].delete(0, END)
         data[key] = input
 
-cosTamTamId
-class logowanie():
+
+class Sign():
     login_counter = 0
     isLogged = False
 
     def reinitialize(self):
         self.root.destroy()
-        self = logowanie()
+        self = Sign()
 
     def __init__(self):
         self.root = Tk()
@@ -78,7 +78,7 @@ class logowanie():
 
         get_logged.grid(row=4, column=1)
 
-    def Odzyskaj_haslo(self) -> None:  # void()
+    def recover_password(self) -> None:  # void()
         pass
 
     def sign_up(self):
