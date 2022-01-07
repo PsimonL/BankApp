@@ -1,5 +1,6 @@
 from tkinter import *
 from helpers import create_inputs, con
+from login_employee import *
 
 
 def get_inputs(inputs, data):
