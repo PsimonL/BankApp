@@ -1,8 +1,11 @@
 from tkinter import *
 from tkcalendar import DateEntry
 from mysql.connector import connect, Error
+from dotenv import load_dotenv
 
+import os
 
+load_dotenv()
 def create_inputs(inputs, parent):
     created_inputs = dict()
     for i in range(0, len(inputs)):
@@ -26,21 +29,34 @@ def create_inputs(inputs, parent):
     return created_inputs
 
 
-def con(query="describe clients",is_update=False):
+def con(query="select * from clients", is_update=False,is_multi=False):
+
     try:
         with connect(
-                host="sql11.freemysqlhosting.net",
-                user="sql11461517",
-                password="Z9nGjqHb1r",
-                database="sql11461517"
+                host=os.getenv("HOST"),
+                user=os.getenv("USER"),
+                password=os.getenv("PASSWORD"),
+                database=os.getenv("DATABASE")
         ) as connection:
             with connection.cursor() as cursor:
                 cursor.execute(query)
                 if is_update:
                     connection.commit()
+                elif(is_multi):
+                    res=cursor.fetchall()
+                    for el in res:
+                        print(el)
+                    return res
                 else:
                     for el in cursor:
+                        print(el)
                         return el
+
 
     except Error as e:
         print(e)
+def get_inputs(inputs, data):
+    for key in inputs:
+        input = inputs[key].get()
+        inputs[key].delete(0, END)
+        data[key] = input
