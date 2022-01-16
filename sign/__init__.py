@@ -13,6 +13,7 @@ class Sign():
     button_height = 7
     button_standard_size = ""
 
+
     def my_button(self, src, txt, command, width=button_width, height=button_height):
         return tkinter.Button(src, text=txt, width=width, height=height, command=command)
 
@@ -37,7 +38,7 @@ class Sign():
 
     def reinitialize(self):
         self.root.destroy()
-        self = Sign(self.is_employee)
+        Sign(self.is_employee)
 
     def for_employee(self):
         sign_up_button = self.my_button(self.main_container, txt="Log in", command=self.sign_in_employee)
@@ -70,8 +71,10 @@ class Sign():
         self.isRoot = False
         self.set_return_visible()
 
+
         fields = ['pesel', 'password']
         data = dict()
+        error_labels=dict()
 
         self.main_container.destroy()
         self.login_container = Frame(self.root)
@@ -79,10 +82,11 @@ class Sign():
 
         self.root.title("Login Panel")
 
-        inputs = create_inputs(fields, self.login_container)
+        inputs = create_inputs(fields, self.login_container,error_labels)
 
         def recover_password():
-            get_inputs(inputs, data)
+            if not get_inputs(inputs, data,error_labels):
+                return
             print(data['pesel'])
             password = con(select_user_by_pesel_query_part1 + data['pesel'])[4]
             print(password)
@@ -93,7 +97,8 @@ class Sign():
             if self.login_counter > 2:
                 print("Zbyt wiele nieudanych prob logowania!")
                 self.root.destroy()
-            get_inputs(inputs, data)
+            if not get_inputs(inputs, data,error_labels):
+                return
             query = select_client_query + data['pesel']
             user = con(query)
 
@@ -114,13 +119,15 @@ class Sign():
     def sign_in_employee(self):
 
         self.root.destroy()
-
         login_panel = Tk()
         login_panel.title("Enter data")
+        error_labels = dict()
 
         def submit():
             data = dict()
-            get_inputs(inputs, data)
+            if not get_inputs(inputs, data,error_labels):
+                return
+
             user = con(select_unconfirmed_clients_query, False, True)
 
             for i in range(len(e_ids)):
@@ -132,7 +139,7 @@ class Sign():
             login_panel.destroy()
 
         fields = ["Employee_ID", "Password"]
-        inputs = create_inputs(fields, login_panel)
+        inputs = create_inputs(fields, login_panel,error_labels)
 
         sub = Button(login_panel, text="Submit", padx=87, pady=40, command=submit)
         sub.grid(row=3, column=1)
@@ -140,8 +147,10 @@ class Sign():
     def sign_up(self):
         self.isRoot = False
         self.set_return_visible()
+
         fields = ["pesel", "name", "surname", "date", "password", "confirm_password"]
         data = dict()
+        error_labels = dict()
 
         self.main_container.destroy()
         registration_panel = Frame(self.root)
@@ -149,14 +158,15 @@ class Sign():
 
         self.root.title("Create an account")
 
-        inputs = create_inputs(fields, registration_panel)
+        inputs = create_inputs(fields, registration_panel,error_labels)
 
         def check_is_pesel_valid():
             res=con(select_user_by_pesel_query_part1+ data['pesel'])
             return res is None and len(data['pesel']) == 11
 
         def create_user():
-            get_inputs(inputs, data)
+            if not get_inputs(inputs, data,error_labels):
+                return
             date_of_birth = data['date']
             print(data['password'])
             print(data['confirm_password'])
@@ -179,6 +189,8 @@ class Sign():
         get_created = Button(registration_panel, text="Create an Account", width=self.button_width,
                              height=self.button_height, command=create_user)
         get_created.grid(row=6, column=1)
+
+
 
 
 def end():
