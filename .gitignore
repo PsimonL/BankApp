@@ -112,5 +112,6 @@ fabric.properties
 /venv/
 
 .env
+.idea/dataSources.xml
 
 __pycache__

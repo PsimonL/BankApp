@@ -15,7 +15,6 @@ def create_inputs(inputs, parent, error_labels):
         field_name = inputs[i]
         error_label_name = inputs[i]
 
-
         field = locals()[field_name] = ''
 
         error_labels[error_label_name] = ''
@@ -25,7 +24,7 @@ def create_inputs(inputs, parent, error_labels):
 
         field_label = Label(field_container, text=field_name.capitalize())
         error_label = Label(field_container, text=field_name.capitalize() + " required!")
-        error_labels[error_label_name]=error_label
+        error_labels[error_label_name] = error_label
 
         if field_name == 'date':
             field = DateEntry(field_container, width=35, borderwidth=5)
@@ -41,7 +40,7 @@ def create_inputs(inputs, parent, error_labels):
     return created_inputs
 
 
-def con(query="select * from clients", is_update=False, is_multi=False):
+def mySQL_connection(query="select * from clients", is_update=False, is_multi=False):
     try:
         with connect(
                 host=os.getenv("HOST"),
@@ -55,12 +54,9 @@ def con(query="select * from clients", is_update=False, is_multi=False):
                     connection.commit()
                 elif (is_multi):
                     res = cursor.fetchall()
-                    for el in res:
-                        print(el)
                     return res
                 else:
                     for el in cursor:
-                        print(el)
                         return el
 
 
@@ -69,11 +65,11 @@ def con(query="select * from clients", is_update=False, is_multi=False):
 
 
 def get_inputs(inputs, data, error_labels):
-    is_all_fields_filled=True
+    is_all_fields_filled = True
     for key in inputs:
         if len(inputs[key].get()) == 0:
             error_labels[key].grid()
-            is_all_fields_filled=False
+            is_all_fields_filled = False
         else:
             error_labels[key].grid_forget()
             input = inputs[key].get()
