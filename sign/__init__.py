@@ -1,5 +1,7 @@
 import tkinter
 from tkinter import *
+
+from clientpanel import ClientPanel
 from helpers import create_inputs, mySQL_connection, get_inputs
 from employeepanel import EmployeePanel
 from db.queries import *
@@ -12,16 +14,16 @@ class Sign():
     button_width = 25
     button_height = 7
     button_standard_size = ""
-
+    return_button = None
     def my_button(self, src, txt, command, width=button_width, height=button_height):
         return tkinter.Button(src, text=txt, width=width, height=height, command=command)
 
     def __init__(self, is_employee):
 
-        self.login_container = None
+
         self.return_button = None
         self.login_counter = 0
-        self.isRoot = None
+        self.isRoot = True
 
         self.root = Tk()
         self.root.title("Sign in panel")
@@ -29,7 +31,9 @@ class Sign():
 
         self.main_container = Frame(self.root)
         self.main_container.pack()
-
+        self.return_button = self.my_button(self.root, txt="return", command=self.reinitialize)
+        self.return_button.pack(side="bottom")
+        self.set_return_visible()
         if is_employee:
             self.for_employee()
         else:
@@ -43,32 +47,30 @@ class Sign():
         sign_up_button = self.my_button(self.main_container, txt="Log in", command=self.sign_in_employee)
         exit_button = self.my_button(self.main_container, txt="Exit", command=end)
 
-        sign_up_button.grid(row=1, column=1)
-        exit_button.grid(row=2, column=1)
+        sign_up_button.grid(row=1, column=0)
+        exit_button.grid(row=2, column=0)
 
     def for_client(self):
 
         sign_up_button = self.my_button(self.main_container, txt="Sign up", command=self.sign_up)
         sign_in_button = self.my_button(self.main_container, txt="Sign in", command=self.sign_in_client)
         exit_button = self.my_button(self.main_container, txt="Exit", command=end)
-        self.return_button = self.my_button(self.root, txt="return", command=self.reinitialize)
 
-        sign_up_button.grid(row=1, column=1)
-        sign_in_button.grid(row=2, column=1)
-        exit_button.grid(row=3, column=1)
+
+        sign_up_button.grid(row=1, column=0)
+        sign_in_button.grid(row=2, column=0)
+        exit_button.grid(row=3, column=0)
 
         self.isRoot = True
-        self.set_return_visible()
 
     def set_return_visible(self):
-        if not self.isRoot:
-            self.return_button.pack(side='bottom')
-        else:
+
+        if self.isRoot:
             self.return_button.pack_forget()
+        else:
+            self.return_button.pack()
 
     def sign_in_client(self):
-        self.isRoot = False
-        self.set_return_visible()
 
         fields = ['pesel', 'password']
         data = dict()
@@ -77,10 +79,12 @@ class Sign():
         self.main_container.destroy()
         login_container = Frame(self.root)
         login_container.pack()
+        self.isRoot = False
+        self.set_return_visible()
 
         self.root.title("Login Panel")
 
-        inputs = create_inputs(fields, self.login_container, error_labels)
+        inputs = create_inputs(fields, login_container, error_labels)
 
         def recover_password():
             if not get_inputs(inputs, data, error_labels):
@@ -88,7 +92,7 @@ class Sign():
             print(data['pesel'])
             password = mySQL_connection(select_user_by_pesel_query + data['pesel'])[4]
             print(password)
-            password_label = Label(self.login_container, text="Your password is: " + password)
+            password_label = Label(login_container, text="Your password is: " + password)
             password_label.grid(row=3, column=2)
 
         def sign():
@@ -101,15 +105,16 @@ class Sign():
             user = mySQL_connection(query)
 
             print(user)
-            if user[2] == data['password']:
-                print("Zalogowany jako:", data['pesel'])
-                self.login_container.destroy()
+            if user[2] == data['password']and user[7]==1:
+                self.root.destroy()
+                ClientPanel(user)
+
             else:
                 self.login_counter += 1
                 print("Zly login lub haslo!")
 
-        get_logged = self.my_button(self.login_container, txt="Log in", command=sign)
-        retrieve_password_button = self.my_button(self.login_container, txt="Odzyskaj haslo", command=recover_password)
+        get_logged = self.my_button(login_container, txt="Log in", command=sign)
+        retrieve_password_button = self.my_button(login_container, txt="Odzyskaj haslo", command=recover_password)
         retrieve_password_button.grid(row=4, column=1)
 
         get_logged.grid(row=4, column=2)
@@ -144,9 +149,6 @@ class Sign():
         sub.grid(row=3, column=1)
 
     def sign_up(self):
-        self.isRoot = False
-        self.set_return_visible()
-
         fields = ["pesel", "name", "surname", "date", "password", "confirm_password"]
         data = dict()
         error_labels = dict()
@@ -154,6 +156,9 @@ class Sign():
         self.main_container.destroy()
         registration_panel = Frame(self.root)
         registration_panel.pack()
+
+        self.isRoot = False
+        self.set_return_visible()
 
         self.root.title("Create an account")
 
@@ -177,7 +182,7 @@ class Sign():
                         data['name'] + '\'' + ',' + '\'' + data['surname'] + '\'' + ''', 0, 0, False,0,0,0)
                 '''
                 print(query)
-                user = mySQL_connection(query, True)
+                mySQL_connection(query, True)
                 print("Pomyslnie utworzono konto, Witamy Cie:", data['name'], data['surname'], "\b!")
 
                 registration_panel.destroy()

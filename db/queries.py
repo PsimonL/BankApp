@@ -9,6 +9,8 @@ select_user_by_pesel_query="select password from clients where pesel= "
 
 select_employees_query="select * from employees where id="
 
-confirm_client_account_query="UPDATE clients SET confirmed = 1 WHERE pesel ="
+confirm_client_account_query="UPDATE clients SET confirmed = 1,accountNumber=id WHERE pesel ="
 
 reject_client_account_query="UPDATE clients SET hidden = 1 WHERE pesel ="
+
+select_wallet_by_account_query="select * from wallets where accountNumber="
